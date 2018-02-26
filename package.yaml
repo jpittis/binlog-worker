@@ -1,0 +1,39 @@
+name: binlog-worker
+version: 0.1.0.0
+github: "jpittis/binlog-worker"
+license: BSD3
+author: "Jake Pittis"
+maintainer: "jakepittis@gmail.com"
+copyright: "2018 Jake Pittis"
+
+extra-source-files:
+- README.md
+
+synopsis: A library for doing work on the MySQL binlog.
+category: Web
+description: Please see the README on Github at <https://github.com/jpittis/binlog-worker#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+  dependencies:
+  - mysql-haskell
+  - text
+  - containers
+  - stm
+  - async
+  - mtl
+
+tests:
+  binlog-worker-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - binlog-worker
+    - hspec
