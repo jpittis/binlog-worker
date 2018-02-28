@@ -39,7 +39,9 @@ packages:
 - .
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-# extra-deps: []
+extra-deps:
+- git: git@github.com:jpittis/heh.git
+  commit: b8d5c47c800a0ee6bc5b40fe4c6ea5c0e325f18b
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

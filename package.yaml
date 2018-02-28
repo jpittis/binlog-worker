@@ -37,3 +37,5 @@ tests:
     dependencies:
     - binlog-worker
     - hspec
+    - heh
+    - async
