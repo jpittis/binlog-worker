@@ -25,6 +25,8 @@ library:
   - stm
   - async
   - mtl
+  - io-streams
+  - bytestring
 
 tests:
   binlog-worker-test:

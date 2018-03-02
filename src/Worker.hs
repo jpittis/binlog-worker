@@ -1,6 +1,6 @@
+{-# LANGUAGE LambdaCase #-}
 module Worker
     ( Worker(..)
-    , Database(..)
     , attachJob
     , detachJob
     , newWorker
@@ -17,20 +17,16 @@ import Control.Concurrent.Async (async, Async)
 import Control.Monad.Reader (ReaderT, runReaderT, liftIO, asks)
 import qualified Data.Map.Strict as Map (Map, insert, delete, empty)
 import qualified Database.MySQL.BinLog as BinLog (BinLogTracker)
+import System.Exit (die)
+import Control.Monad (forever)
+import qualified System.IO.Streams as Streams (read)
 
 import Job
+import BinLog
 
 data Worker = Worker
   { commands :: TChan WorkerCommand
   , handle   :: Async ()
-  }
-
-data Database = Database
-  { dbUser     :: Text
-  , dbPassword :: Text
-  , dbHost     :: String
-  , dbDatabase :: Text
-  , dbSlaveID  :: Word32
   }
 
 attachJob :: Worker -> Job -> IO JobID
@@ -102,3 +98,14 @@ work = do
       jobs <- asks wrksJobs
       liftIO $ modifyMVar_ jobs $ \jobMap -> return $ Map.delete jobID jobMap
       liftIO $ putMVar resp ()
+    streamer :: Database -> IO Streamer
+    streamer database =
+      newStreamer database Nothing >>= \case
+        Nothing       -> die "Failed to create streamer."
+        Just streamer -> return streamer
+    printStreamer :: Streamer -> IO ()
+    printStreamer streamer =
+      forever $
+        Streams.read (strmStream streamer) >>= \case
+          Just v  -> print v
+          Nothing -> return ()
