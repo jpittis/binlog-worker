@@ -57,7 +57,13 @@ newWorker db = do
       }
   return $ Worker commands handle
   where
+    startWorker :: WorkerState -> IO (Async ())
     startWorker state = async $ runReaderT work state
+    streamer :: Database -> IO Streamer
+    streamer database =
+      newStreamer database Nothing >>= \case
+        Nothing       -> die "Failed to create streamer."
+        Just streamer -> return streamer
 
 data WorkerState = WorkerState
   { wrksDatabase  :: Database
@@ -98,14 +104,3 @@ work = do
       jobs <- asks wrksJobs
       liftIO $ modifyMVar_ jobs $ \jobMap -> return $ Map.delete jobID jobMap
       liftIO $ putMVar resp ()
-    streamer :: Database -> IO Streamer
-    streamer database =
-      newStreamer database Nothing >>= \case
-        Nothing       -> die "Failed to create streamer."
-        Just streamer -> return streamer
-    printStreamer :: Streamer -> IO ()
-    printStreamer streamer =
-      forever $
-        Streams.read (strmStream streamer) >>= \case
-          Just v  -> print v
-          Nothing -> return ()
